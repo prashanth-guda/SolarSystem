@@ -1,6 +1,9 @@
 const canvas = document.getElementById('solarCanvas');
-const scene = new THREE.Scene();
+const tooltip = document.getElementById('tooltip');
+const pauseBtn = document.getElementById('pauseBtn');
+let paused = false;
 
+const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
   75,
   window.innerWidth / window.innerHeight,
@@ -23,7 +26,24 @@ const sunGeo = new THREE.SphereGeometry(3, 32, 32);
 const sunMat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
 const sun = new THREE.Mesh(sunGeo, sunMat);
 scene.add(sun);
-pointLight.position.set(0, 0, 0); // Sun emits light
+pointLight.position.set(0, 0, 0);
+
+// Starfield background
+const starGeo = new THREE.BufferGeometry();
+const starCount = 1000;
+const starPositions = [];
+
+for (let i = 0; i < starCount; i++) {
+  const x = (Math.random() - 0.5) * 1000;
+  const y = (Math.random() - 0.5) * 1000;
+  const z = (Math.random() - 0.5) * 1000;
+  starPositions.push(x, y, z);
+}
+
+starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
+const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 1 });
+const stars = new THREE.Points(starGeo, starMat);
+scene.add(stars);
 
 // Planet data
 const planetData = [
@@ -37,10 +57,12 @@ const planetData = [
   { name: 'Neptune', radius: 1.0, distance: 30, color: 0x3366cc }
 ];
 
-// Controls and planet setup
 const planets = [];
 const speeds = {};
 const controls = document.getElementById('controls');
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
 
 planetData.forEach((data, index) => {
   const geo = new THREE.SphereGeometry(data.radius, 32, 32);
@@ -72,27 +94,50 @@ planetData.forEach((data, index) => {
   controls.appendChild(slider);
 });
 
-// Animate
+// Pause/Resume toggle
+pauseBtn.addEventListener('click', () => {
+  paused = !paused;
+  pauseBtn.textContent = paused ? 'Resume' : 'Pause';
+});
+
 function animate() {
   requestAnimationFrame(animate);
 
-  planets.forEach(planet => {
-    const name = planet.userData.name;
-    const speed = speeds[name];
-    planet.userData.angle += speed;
-    const angle = planet.userData.angle;
-    const distance = planet.userData.distance;
-    planet.position.set(
-      distance * Math.cos(angle),
-      0,
-      distance * Math.sin(angle)
-    );
-  });
+  if (!paused) {
+    planets.forEach(planet => {
+      const { angle, distance, name } = planet.userData;
+      planet.userData.angle += speeds[name];
+      const a = planet.userData.angle;
+      planet.position.set(
+        distance * Math.cos(a),
+        0,
+        distance * Math.sin(a)
+      );
+    });
+  }
+
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(planets);
+  if (intersects.length > 0) {
+    const obj = intersects[0].object;
+    tooltip.style.display = 'block';
+    tooltip.textContent = obj.userData.name;
+    tooltip.style.left = `${(mouse.x + 1) * window.innerWidth / 2 + 10}px`;
+    tooltip.style.top = `${(-mouse.y + 1) * window.innerHeight / 2 + 10}px`;
+  } else {
+    tooltip.style.display = 'none';
+  }
 
   renderer.render(scene, camera);
 }
 
 animate();
+
+// Mouse move for tooltip
+window.addEventListener('mousemove', (event) => {
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+});
 
 // Responsive canvas
 window.addEventListener('resize', () => {

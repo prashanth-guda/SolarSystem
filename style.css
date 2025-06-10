@@ -1,35 +1,60 @@
 body {
-    margin: 0;
-    overflow: hidden;
-    font-family: sans-serif;
-    background-color: black;
-    color: white;
-  }
-  
-  canvas {
-    display: block;
-    width: 100vw;
-    height: 100vh;
-  }
-  
-  #controls {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background-color: rgba(0, 0, 0, 0.6);
-    padding: 10px;
-    border-radius: 8px;
-    z-index: 1;
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-  
-  #controls label {
-    display: block;
-    margin-top: 10px;
-  }
-  
-  #controls input[type=range] {
-    width: 150px;
-  }
-  
+  margin: 0;
+  overflow: hidden;
+  font-family: sans-serif;
+  background-color: black;
+  color: white;
+}
+
+canvas {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+}
+
+#controls {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 10px;
+  border-radius: 8px;
+  z-index: 2;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+#controls label {
+  display: block;
+  margin-top: 10px;
+}
+
+#controls input[type=range] {
+  width: 150px;
+}
+
+#pauseBtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 8px 14px;
+  z-index: 2;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.tooltip {
+  position: absolute;
+  z-index: 3;
+  padding: 5px 8px;
+  background: rgba(0,0,0,0.7);
+  border: 1px solid white;
+  border-radius: 5px;
+  pointer-events: none;
+  font-size: 12px;
+  display: none;
+  color: white;
+}
